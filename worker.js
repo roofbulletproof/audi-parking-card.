@@ -9,7 +9,13 @@ export default {
     const lon = Number(url.searchParams.get("lon"));
 
     const distance = url.searchParams.get("distance") || "Не указано";
-    const duration = url.searchParams.get("time") || "Не указано";
+    const rawDuration = url.searchParams.get("time") || "Не указано";
+
+    // Удаляем URL, если он попал в начало значения времени.
+    const duration = rawDuration
+      .replace(/^https?:\/\/\S+\s*/i, "")
+      .trim()
+      .slice(0, 20);
 
     if (
       !Number.isFinite(lat) ||
@@ -83,8 +89,6 @@ export default {
     }
 
     const mapBase64 = toBase64(bytes);
-
-    const cleanDuration = String(duration).slice(0, 20);
     const cleanDistance = String(distance).slice(0, 20);
 
     const svg = `
@@ -144,7 +148,7 @@ export default {
             font-size="30"
             font-family="Arial"
             font-weight="bold">
-        ${esc(cleanDuration)}
+        ${esc(duration)}
       </text>
 
       <text x="384" y="690"
