@@ -1,22 +1,16 @@
 
 export default {
   async fetch(request, env) {
-    const exists = Boolean(env.GEOAPIFY_API_KEY);
-    const length = env.GEOAPIFY_API_KEY
-      ? env.GEOAPIFY_API_KEY.length
-      : 0;
-
     return new Response(
       JSON.stringify({
-        secretExists: exists,
-        secretLength: length,
-        message: exists
-          ? "Geoapify API key is available"
-          : "Geoapify API key is missing"
+        testSecretExists: Boolean(env.TEST_SECRET),
+        testSecretLength: env.TEST_SECRET?.length || 0,
+        geoapifySecretExists: Boolean(env.GEOAPIFY_API_KEY),
+        geoapifySecretLength: env.GEOAPIFY_API_KEY?.length || 0
       }, null, 2),
       {
         headers: {
-          "Content-Type": "application/json; charset=utf-8",
+          "Content-Type": "application/json",
           "Cache-Control": "no-store"
         }
       }
