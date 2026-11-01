@@ -37,8 +37,8 @@ export default {
     mapUrl.searchParams.set("format", "png");
 
     mapUrl.searchParams.set(
-      "marker",
-      `lonlat:${lon},${lat};type:material;color:%23e53935;size:32`
+      "geometry",
+      `circle:${lon},${lat},35;linewidth:4;linecolor:#e53935`
     );
 
     mapUrl.searchParams.set("apiKey", GEOAPIFY_API_KEY);
@@ -106,67 +106,49 @@ export default {
         fill="#17191d"
       />
 
-      <text
-        x="36"
-        y="557"
-        fill="#ffffff"
-        font-size="23"
-        font-family="Arial"
-        font-weight="bold"
-      >
+      <text x="36" y="557"
+            fill="#ffffff"
+            font-size="23"
+            font-family="Arial"
+            font-weight="bold">
         МЕСТО ПАРКОВКИ
       </text>
 
-      <text
-        x="36"
-        y="615"
-        fill="#aaaaaa"
-        font-size="19"
-        font-family="Arial"
-      >
+      <text x="36" y="615"
+            fill="#aaaaaa"
+            font-size="19"
+            font-family="Arial">
         РАССТОЯНИЕ
       </text>
 
-      <text
-        x="36"
-        y="657"
-        fill="#ffffff"
-        font-size="30"
-        font-family="Arial"
-        font-weight="bold"
-      >
+      <text x="36" y="657"
+            fill="#ffffff"
+            font-size="30"
+            font-family="Arial"
+            font-weight="bold">
         ${esc(distance)}
       </text>
 
-      <text
-        x="420"
-        y="615"
-        fill="#aaaaaa"
-        font-size="19"
-        font-family="Arial"
-      >
+      <text x="420" y="615"
+            fill="#aaaaaa"
+            font-size="19"
+            font-family="Arial">
         ВРЕМЯ В ПУТИ
       </text>
 
-      <text
-        x="420"
-        y="657"
-        fill="#ffffff"
-        font-size="30"
-        font-family="Arial"
-        font-weight="bold"
-      >
+      <text x="420" y="657"
+            fill="#ffffff"
+            font-size="30"
+            font-family="Arial"
+            font-weight="bold">
         ${esc(duration)}
       </text>
 
-      <text
-        x="384"
-        y="690"
-        text-anchor="middle"
-        fill="#aaaaaa"
-        font-size="11"
-        font-family="Arial"
-      >
+      <text x="384" y="690"
+            text-anchor="middle"
+            fill="#aaaaaa"
+            font-size="11"
+            font-family="Arial">
         © Geoapify | © OpenStreetMap contributors
       </text>
 
