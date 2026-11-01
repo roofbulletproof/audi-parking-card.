@@ -84,6 +84,9 @@ export default {
 
     const mapBase64 = toBase64(bytes);
 
+    const cleanDuration = String(duration).slice(0, 20);
+    const cleanDistance = String(distance).slice(0, 20);
+
     const svg = `
     <svg xmlns="http://www.w3.org/2000/svg"
          width="768"
@@ -126,7 +129,7 @@ export default {
             font-size="30"
             font-family="Arial"
             font-weight="bold">
-        ${esc(distance)}
+        ${esc(cleanDistance)}
       </text>
 
       <text x="420" y="615"
@@ -141,7 +144,7 @@ export default {
             font-size="30"
             font-family="Arial"
             font-weight="bold">
-        ${esc(duration)}
+        ${esc(cleanDuration)}
       </text>
 
       <text x="384" y="690"
