@@ -1,3 +1,3 @@
-name = "audi-parking-card"
+name = "audi-parking-card-github"
 main = "worker.js"
-compatibility_date = "2026-11-02"
+compatibility_date = "2026-11-01"
