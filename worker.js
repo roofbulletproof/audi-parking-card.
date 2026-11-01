@@ -1,10 +1,11 @@
 
 export default {
-  async fetch(request) {
+  async fetch(request, env) {
     const url = new URL(request.url);
 
     const lat = Number(url.searchParams.get("lat"));
     const lon = Number(url.searchParams.get("lon"));
+
     const distance = url.searchParams.get("distance") || "Не указано";
     const duration = url.searchParams.get("time") || "Не указано";
 
@@ -17,27 +18,44 @@ export default {
       return new Response("Invalid coordinates", { status: 400 });
     }
 
-    const zoom = 16;
-    const tileCount = 2 ** zoom;
-    const width = 768;
-    const mapHeight = 512;
+    if (!env.GEOAPIFY_API_KEY) {
+      return new Response("Geoapify API key is missing", { status: 500 });
+    }
 
-    const centerX = (lon + 180) / 360 * tileCount * 256;
-    const latRad = lat * Math.PI / 180;
-    const centerY =
-      (1 - Math.asinh(Math.tan(latRad)) / Math.PI) /
-      2 * tileCount * 256;
+    const mapUrl = new URL(
+      "https://maps.geoapify.com/v1/staticmap"
+    );
 
-    const left = centerX - width / 2;
-    const top = centerY - mapHeight / 2;
+    mapUrl.searchParams.set("style", "osm-bright");
+    mapUrl.searchParams.set("width", "768");
+    mapUrl.searchParams.set("height", "512");
+    mapUrl.searchParams.set("center", `lonlat:${lon},${lat}`);
+    mapUrl.searchParams.set("zoom", "16");
+    mapUrl.searchParams.set("format", "png");
+    mapUrl.searchParams.set(
+      "marker",
+      `lonlat:${lon},${lat};type:circle;color:%23e53935;size:24;strokecolor:%23ffffff`
+    );
+    mapUrl.searchParams.set("apiKey", env.GEOAPIFY_API_KEY);
 
-    const startX = Math.floor(left / 256);
-    const endX = Math.floor((left + width) / 256);
-    const startY = Math.floor(top / 256);
-    const endY = Math.floor((top + mapHeight) / 256);
+    let mapResponse;
 
-    function toBase64(buffer) {
-      const bytes = new Uint8Array(buffer);
+    try {
+      mapResponse = await fetch(mapUrl.toString());
+    } catch {
+      return new Response("Geoapify connection failed", { status: 502 });
+    }
+
+    if (!mapResponse.ok) {
+      return new Response(
+        `Geoapify error: ${mapResponse.status} ${await mapResponse.text()}`,
+        { status: 502 }
+      );
+    }
+
+    const mapBytes = new Uint8Array(await mapResponse.arrayBuffer());
+
+    function toBase64(bytes) {
       let binary = "";
       const chunkSize = 8192;
 
@@ -60,68 +78,18 @@ export default {
       })[c]);
     }
 
-    const jobs = [];
-
-    for (let x = startX; x <= endX; x++) {
-      for (let y = startY; y <= endY; y++) {
-        if (y < 0 || y >= tileCount) continue;
-
-        const tileX = ((x % tileCount) + tileCount) % tileCount;
-        const px = x * 256 - left;
-        const py = y * 256 - top;
-
-        jobs.push(
-          (async () => {
-            const tileUrl =
-              `https://tile.openstreetmap.org/${zoom}/${tileX}/${y}.png`;
-
-            const response = await fetch(tileUrl, {
-              headers: { "Accept": "image/png" }
-            });
-
-            if (!response.ok) {
-              throw new Error(`Map tile error: ${response.status}`);
-            }
-
-            const base64 = toBase64(await response.arrayBuffer());
-
-            return `
-              <image
-                href="data:image/png;base64,${base64}"
-                x="${px}" y="${py}"
-                width="256" height="256"
-              />`;
-          })()
-        );
-      }
-    }
-
-    let tiles;
-
-    try {
-      tiles = (await Promise.all(jobs)).join("");
-    } catch (error) {
-      return new Response("Map loading failed: " + error.message, {
-        status: 502
-      });
-    }
+    const mapBase64 = toBase64(mapBytes);
 
     const svg = `
     <svg xmlns="http://www.w3.org/2000/svg"
          width="768" height="700"
          viewBox="0 0 768 700">
 
-      <rect width="768" height="700" fill="#ffffff"/>
-
-      <svg x="0" y="0" width="768" height="512"
-           viewBox="0 0 768 512">
-        ${tiles}
-      </svg>
-
-      <circle cx="384" cy="256" r="22"
-              fill="#e53935" fill-opacity="0.2"/>
-      <circle cx="384" cy="256" r="10"
-              fill="#e53935" stroke="white" stroke-width="4"/>
+      <image
+        href="data:image/png;base64,${mapBase64}"
+        x="0" y="0"
+        width="768" height="512"
+      />
 
       <rect x="0" y="512" width="768" height="188"
             fill="#17191d"/>
@@ -153,7 +121,7 @@ export default {
 
       <text x="384" y="690" text-anchor="middle"
             fill="#aaaaaa" font-size="11" font-family="Arial">
-        © OpenStreetMap contributors
+        © Geoapify | © OpenStreetMap contributors
       </text>
     </svg>`;
 
