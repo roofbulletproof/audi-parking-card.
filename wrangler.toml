@@ -1,3 +1,4 @@
 name = "audi-parking-card-github"
 main = "worker.js"
 compatibility_date = "2026-11-01"
+keep_vars = true
