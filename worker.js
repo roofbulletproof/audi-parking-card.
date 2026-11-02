@@ -44,7 +44,7 @@ export default {
 
     mapUrl.searchParams.set(
       "geometry",
-      `circle:${lon},${lat},35;linewidth:4;linecolor:#e53935`
+      `circle:${lon},${lat},25;linewidth:6;linecolor:#e53935`
     );
 
     mapUrl.searchParams.set("apiKey", GEOAPIFY_API_KEY);
